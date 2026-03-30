@@ -1,0 +1,19 @@
+.{
+    .name = "opus",
+    .version = "0.1.0",
+    .mach_zig_version = "2024.11.0-mach",
+    .paths = .{
+        "src",
+        "build.zig",
+        "build.zig.zon",
+        "README.md",
+        "celt",
+        "COPYING",
+        "LICENSE_PLEASE_READ.txt",
+        "dnn",
+        "include",
+        "silk",
+        "update.sh",
+        "verify.sh",
+    },
+}
