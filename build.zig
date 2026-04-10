@@ -6,48 +6,52 @@ pub fn build(b: *std.Build) void {
     const optimize = b.standardOptimizeOption(.{});
     const target = cross_target.result;
 
-    const lib = b.addStaticLibrary(.{
-        .name = "opus",
+    const mod = b.createModule(.{
         .target = cross_target,
         .optimize = optimize,
         .link_libc = true,
     });
-    lib.root_module.addCMacro("OPUS_BUILD", "1");
-    lib.root_module.addCMacro("VAR_ARRAYS", "1");
-    lib.root_module.addCMacro("HAVE_LRINTF", "1");
-    lib.addIncludePath(b.path("."));
-    lib.addIncludePath(b.path("include"));
-    lib.addIncludePath(b.path("celt"));
-    lib.addIncludePath(b.path("silk"));
-    lib.addIncludePath(b.path("celt/arm"));
-    lib.addIncludePath(b.path("silk/float"));
-    lib.addIncludePath(b.path("silk/fixed"));
 
-    lib.addCSourceFiles(.{ .files = sources ++ silk_sources_float });
+    const lib = b.addLibrary(.{
+        .name = "opus",
+        .root_module = mod,
+    });
+    mod.addCMacro("OPUS_BUILD", "1");
+    mod.addCMacro("VAR_ARRAYS", "1");
+    mod.addCMacro("HAVE_LRINTF", "1");
+    mod.addIncludePath(b.path("."));
+    mod.addIncludePath(b.path("include"));
+    mod.addIncludePath(b.path("celt"));
+    mod.addIncludePath(b.path("silk"));
+    mod.addIncludePath(b.path("celt/arm"));
+    mod.addIncludePath(b.path("silk/float"));
+    mod.addIncludePath(b.path("silk/fixed"));
+
+    mod.addCSourceFiles(.{ .files = sources ++ silk_sources_float });
     if (target.cpu.arch.isX86()) {
         if (std.Target.x86.featureSetHas(target.cpu.features, .sse)) {
-            lib.root_module.addCMacro("OPUS_X86_MAY_HAVE_SSE", "1");
-            lib.root_module.addCMacro("OPUS_X86_PRESUME_SSE", "1");
-            lib.addCSourceFiles(.{ .files = celt_sources_sse });
+            mod.addCMacro("OPUS_X86_MAY_HAVE_SSE", "1");
+            mod.addCMacro("OPUS_X86_PRESUME_SSE", "1");
+            mod.addCSourceFiles(.{ .files = celt_sources_sse });
         }
         if (std.Target.x86.featureSetHas(target.cpu.features, .sse2)) {
-            lib.root_module.addCMacro("OPUS_X86_MAY_HAVE_SSE2", "1");
-            lib.root_module.addCMacro("OPUS_X86_PRESUME_SSE2", "1");
-            lib.addCSourceFiles(.{ .files = celt_sources_sse2 });
+            mod.addCMacro("OPUS_X86_MAY_HAVE_SSE2", "1");
+            mod.addCMacro("OPUS_X86_PRESUME_SSE2", "1");
+            mod.addCSourceFiles(.{ .files = celt_sources_sse2 });
         }
         if (std.Target.x86.featureSetHas(target.cpu.features, .sse4_1)) {
-            lib.root_module.addCMacro("OPUS_X86_MAY_HAVE_SSE4_1", "1");
-            lib.root_module.addCMacro("OPUS_X86_PRESUME_SSE4_1", "1");
-            lib.addCSourceFiles(.{ .files = celt_sources_sse4_1 ++ silk_sources_sse4_1 });
+            mod.addCMacro("OPUS_X86_MAY_HAVE_SSE4_1", "1");
+            mod.addCMacro("OPUS_X86_PRESUME_SSE4_1", "1");
+            mod.addCSourceFiles(.{ .files = celt_sources_sse4_1 ++ silk_sources_sse4_1 });
         }
     }
 
     if (target.cpu.arch.isArm() and std.Target.arm.featureSetHas(target.cpu.features, .neon) or
         target.cpu.arch.isAARCH64() and std.Target.aarch64.featureSetHas(target.cpu.features, .neon))
     {
-        lib.root_module.addCMacro("OPUS_ARM_MAY_HAVE_NEON_INTR", "1");
-        lib.root_module.addCMacro("OPUS_ARM_PRESUME_NEON_INTR", "1");
-        lib.addCSourceFiles(.{ .files = celt_sources_arm_neon ++ silk_sources_arm_neon });
+        mod.addCMacro("OPUS_ARM_MAY_HAVE_NEON_INTR", "1");
+        mod.addCMacro("OPUS_ARM_PRESUME_NEON_INTR", "1");
+        mod.addCSourceFiles(.{ .files = celt_sources_arm_neon ++ silk_sources_arm_neon });
     }
 
     lib.installHeadersDirectory(b.path("include"), "", .{});

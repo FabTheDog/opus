@@ -1,7 +1,8 @@
 .{
-    .name = "opus",
+    .name = .opus,
+    .fingerprint = 0x8db4fd2c78bbbda7,
     .version = "0.1.0",
-    .mach_zig_version = "2024.11.0-mach",
+    .mach_zig_version = "2026.4.10-mach",
     .paths = .{
         "src",
         "build.zig",
