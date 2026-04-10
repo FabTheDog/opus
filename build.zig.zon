@@ -1,6 +1,6 @@
 .{
     .name = .opus,
-    .fingerprint = 0x8db4fd2c78bbbda7,
+    .fingerprint = 0x8db4fd2c78bbbda7, // Changing this has security and trust implications.
     .version = "0.1.0",
     .mach_zig_version = "2026.4.10-mach",
     .paths = .{
