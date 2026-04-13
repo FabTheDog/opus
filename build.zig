@@ -72,6 +72,7 @@ const sources = &[_][]const u8{
     "src/opus_projection_encoder.c",
     "src/opus.c",
     "src/repacketizer.c",
+    "src/extensions.c",
 
     "celt/bands.c",
     "celt/celt.c",
