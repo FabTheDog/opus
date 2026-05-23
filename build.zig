@@ -54,6 +54,21 @@ pub fn build(b: *std.Build) void {
         mod.addCSourceFiles(.{ .files = celt_sources_arm_neon ++ silk_sources_arm_neon });
     }
 
+    // iOS targets require the iOS SDK sysroot (libc headers are not bundled
+    // with Zig). Pull the headers, frameworks, and stub libs from the bundled
+    // `xcode_frameworks` package so the C sources can find <string.h> etc.
+    if (target.os.tag == .ios) {
+        if (b.lazyDependency("xcode_frameworks", .{
+            .target = cross_target,
+            .optimize = optimize,
+        })) |dep| {
+            const subdir = if (target.abi == .simulator) "iphonesimulator" else "iphoneos";
+            mod.addSystemFrameworkPath(dep.path(b.fmt("{s}/Frameworks", .{subdir})));
+            mod.addSystemIncludePath(dep.path(b.fmt("{s}/include", .{subdir})));
+            mod.addLibraryPath(dep.path(b.fmt("{s}/lib", .{subdir})));
+        }
+    }
+
     lib.installHeadersDirectory(b.path("include"), "", .{});
     b.installArtifact(lib);
 }
